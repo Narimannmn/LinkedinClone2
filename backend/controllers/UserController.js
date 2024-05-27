@@ -3,7 +3,7 @@ const User = require('../models/User');
 class UserController {
   async registration(req, res, next) {
     try {
-      const { name, bio, profilePicture, walletAddress } = req.body;
+        const { name, bio, profilePicture, walletAddress } = req.body;
 
       // Check if the user already exists
       let existingUser = await User.findOne({ walletAddress });
@@ -182,6 +182,43 @@ class UserController {
       return res.status(200).json({ message: 'User information updated successfully', user });
     } catch (error) {
       console.error('Error updating user information:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+  async getFriendRequests(req, res, next) {
+    try {
+      const { walletAddress } = req.body;
+      console.log(walletAddress)
+      // Find the user based on the wallet address
+      const user = await User.findOne({ walletAddress });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Extract friend requests received
+      const friendRequestsReceived = user.friendRequestsReceived;
+
+      return res.status(200).json({ friendRequestsReceived });
+    } catch (error) {
+      console.error("Error getting friend requests:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+  async getFriends(req, res, next) {
+    try {
+      const { walletAddress } = req.body;
+
+      // Find the user by wallet address
+      const user = await User.findOne({ walletAddress });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Return the list of friends
+      return res.status(200).json({ friends: user.friends });
+    } catch (error) {
+      console.error('Error getting friends:', error);
       return res.status(500).json({ message: 'Internal server error' });
     }
   }
